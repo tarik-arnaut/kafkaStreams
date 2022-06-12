@@ -28,7 +28,7 @@ public class CasinoTransactionProducer {
         List.of(
             CasinoTransaction.builder()
                 .id(1L)
-                .type("First type")
+                .type("Error3")
                 .status("Active")
                 .accountId(1)
                 .amount(1)

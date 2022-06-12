@@ -9,10 +9,7 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -43,6 +40,12 @@ public class CasinoTransactionTopology {
     KStream<Long, CasinoZiqni> casinoZiqniStream =
         streamsBuilder.stream(
                         "casino.transaction", Consumed.with(Serdes.Long(), casinoTransactionSerde))
+                .filter(new Predicate<Long, CasinoTransaction>() {
+                  @Override
+                  public boolean test(Long aLong, CasinoTransaction casinoTransaction) {
+                    return casinoTransaction.getType().equals("Error");
+                  }
+                })
             .groupByKey()
             .aggregate(
                 CasinoZiqni::new,
