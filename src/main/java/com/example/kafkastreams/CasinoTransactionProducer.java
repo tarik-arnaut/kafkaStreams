@@ -70,20 +70,34 @@ public class CasinoTransactionProducer {
                 .undoControlId(1)
                 .uuid(3L)
                 .build(),
-                CasinoTransactionRequest.builder()
-                        .id(10L)
-                        .type("Third type")
-                        .status("Inactive")
-                        .accountId(1)
-                        .amount(1)
-                        .createdAt(3123123L)
-                        .currency("3213")
-                        .paymentId(35L)
-                        .reversesId(3)
-                        .userType("ewqe")
-                        .undoControlId(1)
-                        .uuid(3L)
-                        .build());
+            CasinoTransactionRequest.builder()
+                .id(10L)
+                .type("Third type")
+                .status("Inactive")
+                .accountId(1)
+                .amount(1)
+                .createdAt(3123123L)
+                .currency("3213")
+                .paymentId(35L)
+                .reversesId(3)
+                .userType("ewqe")
+                .undoControlId(1)
+                .uuid(3L)
+                .build(),
+            CasinoTransactionRequest.builder()
+                .id(333L)
+                .type("Third type")
+                .status("Inactive")
+                .accountId(1)
+                .amount(1)
+                .createdAt(3123123L)
+                .currency("3213")
+                .paymentId(76L)
+                .reversesId(3)
+                .userType("ewqe")
+                .undoControlId(1)
+                .uuid(3L)
+                .build());
 
     List<AccountsProductRequest> productData =
         List.of(
@@ -108,13 +122,13 @@ public class CasinoTransactionProducer {
                 .displayId("Left")
                 .group("some group")
                 .build(),
-                AccountsProductRequest.builder()
-                        .type("2nd type")
-                        .id(10L)
-                        .aggregator("Aggry")
-                        .displayId("Left")
-                        .group("some group")
-                        .build());
+            AccountsProductRequest.builder()
+                .type("2nd type")
+                .id(10L)
+                .aggregator("Aggry")
+                .displayId("Left")
+                .group("some group")
+                .build());
 
     List<PaymentRequest> paymentData =
         List.of(
@@ -139,23 +153,29 @@ public class CasinoTransactionProducer {
                 .strategy(3231231)
                 .sourceId("Right")
                 .build(),
-                PaymentRequest.builder()
-                        .id(10L)
-                        .status(123)
-                        .uuid("deqweqw")
-                        .strategy(3231231)
-                        .sourceId("Right")
-                        .build()
-                );
+            PaymentRequest.builder()
+                .id(10L)
+                .status(123)
+                .uuid("deqweqw")
+                .strategy(3231231)
+                .sourceId("Right")
+                .build(),
+            PaymentRequest.builder()
+                .id(333L)
+                .status(123)
+                .uuid("deqweqw")
+                .strategy(3231231)
+                .sourceId("Right")
+                .build());
 
     transactionData.stream()
-            .map(
-                    casinoTransactionRequest ->
-                            new ProducerRecord<>(
-                                    "casino.transaction",
-                                    casinoTransactionRequest.getId(),
-                                    toJson(casinoTransactionRequest)))
-            .forEach(record -> send(producer, record));
+        .map(
+            casinoTransactionRequest ->
+                new ProducerRecord<>(
+                    "casino.transaction",
+                    casinoTransactionRequest.getId(),
+                    toJson(casinoTransactionRequest)))
+        .forEach(record -> send(producer, record));
 
     productData.stream()
         .map(
@@ -172,8 +192,6 @@ public class CasinoTransactionProducer {
                 new ProducerRecord<>(
                     "payment.topic", paymentRequest.getId(), toJson(paymentRequest)))
         .forEach(record -> send(producer, record));
-
-
   }
 
   @SneakyThrows

@@ -12,11 +12,11 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.GlobalKTable;
+import org.apache.kafka.streams.kstream.KStream;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
 
 @Service
 @Slf4j
@@ -72,56 +72,49 @@ public class CasinoTransactionTopology {
 
     KStream<Long, CasinoTransactionRequest> casinoTransactionRequestStream =
         streamsBuilder.stream(
-                "casino.transaction", Consumed.with(Serdes.Long(), casinoTransactionRequestSerde))
-            .selectKey((key, value) -> value.getId());
+                "casino.transaction", Consumed.with(Serdes.Long(), casinoTransactionRequestSerde));
 
-    KTable<Long, PaymentRequest> paymentRequestStream =
+    GlobalKTable<Long, PaymentRequest> paymentRequestStream =
         streamsBuilder
-            .table("payment.topic", Consumed.with(Serdes.Long(), paymentRequestSerde))
-            .toStream()
-            .selectKey((key, value) -> value.getId())
-            .toTable();
+            .globalTable("payment.topic", Consumed.with(Serdes.Long(), paymentRequestSerde));
 
-    KTable<Long, AccountsProductRequest> accountsProductRequestTable =
+    GlobalKTable<String, AccountsProductRequest> accountsProductRequestTable =
         streamsBuilder
-            .table(
-                "accounts.product.topic", Consumed.with(Serdes.Long(), accountsProductRequestSerde))
-            .toStream()
-            .selectKey((key, value) -> value.getId())
-            .toTable();
-
-    ValueJoiner<CasinoTransactionRequest, PaymentRequest, EnrichedCasinoTransaction>
-        casinoPaymentJoiner =
-            (casinoTransaction, payment) ->
-                EnrichedCasinoTransaction.builder()
-                    .casinoTransactionRequest(casinoTransaction)
-                    .paymentRequest(payment)
-                    .accountsProductRequest(createAccountsProductRequest(payment))
-                    .build();
-
-    ValueJoiner<EnrichedCasinoTransaction, AccountsProductRequest, EnrichedCasinoTransaction>
-        enrichmentJoiner =
-            (enrichedCasinoTransaction, accountsProduct) -> {
-              if (accountsProduct != null
-                  && accountsProduct
-                      .getDisplayId()
-                      .equals(enrichedCasinoTransaction.getPaymentRequest().getSourceId())) {
-                enrichedCasinoTransaction.setAccountsProductRequest(accountsProduct);
-              }
-              return enrichedCasinoTransaction;
-            };
-
-    KStream<Long, EnrichedCasinoTransaction> enrichedCasinoTransactionStream =
-        casinoTransactionRequestStream.join(
-            paymentRequestStream.toStream(),
-            casinoPaymentJoiner,
-            JoinWindows.of(Duration.ofSeconds(3)),
-            StreamJoined.with(Serdes.Long(), casinoTransactionRequestSerde, paymentRequestSerde));
-
-    enrichedCasinoTransactionStream.leftJoin(
-        accountsProductRequestTable,
-        enrichmentJoiner,
-        Joined.with(Serdes.Long(), enrichedCasinoTransactionSerde, accountsProductRequestSerde));
+            .globalTable(
+                "accounts.product.topic", Consumed.with(Serdes.String(), accountsProductRequestSerde));
+//
+//    ValueJoiner<CasinoTransactionRequest, PaymentRequest, EnrichedCasinoTransaction>
+//        casinoPaymentJoiner =
+//            (casinoTransaction, payment) ->
+//                EnrichedCasinoTransaction.builder()
+//                    .casinoTransactionRequest(casinoTransaction)
+//                    .paymentRequest(payment)
+//                    .accountsProductRequest(createAccountsProductRequest(payment))
+//                    .build();
+//
+//    ValueJoiner<EnrichedCasinoTransaction, AccountsProductRequest, EnrichedCasinoTransaction>
+//        enrichmentJoiner =
+//            (enrichedCasinoTransaction, accountsProduct) -> {
+//              if (accountsProduct != null
+//                  && accountsProduct
+//                      .getDisplayId()
+//                      .equals(enrichedCasinoTransaction.getPaymentRequest().getSourceId())) {
+//                enrichedCasinoTransaction.setAccountsProductRequest(accountsProduct);
+//              }
+//              return enrichedCasinoTransaction;
+//            };
+//
+//    KStream<Long, EnrichedCasinoTransaction> enrichedCasinoTransactionStream =
+//        casinoTransactionRequestStream.join(
+//            paymentRequestStream.toStream(),
+//            casinoPaymentJoiner,
+//            JoinWindows.of(Duration.ofSeconds(3)),
+//            StreamJoined.with(Serdes.Long(), casinoTransactionRequestSerde, paymentRequestSerde));
+//
+//    enrichedCasinoTransactionStream.leftJoin(
+//        accountsProductRequestTable,
+//        enrichmentJoiner,
+//        Joined.with(Serdes.Long(), enrichedCasinoTransactionSerde, accountsProductRequestSerde));
 
     //    enrichedCasinoTransactionStream = enrichedCasinoTransactionStream
     //            .filter((key, value)->
@@ -133,25 +126,25 @@ public class CasinoTransactionTopology {
     //            "key "+key+" value "+value
     //    ));
 
-    //    KStream<Long, EnrichedCasinoTransaction> enrichedCasinoTransactionStream =
-    //            casinoTransactionRequestStream
-    //                    .leftJoin(paymentRequestStream, (casinoKey, casinoValue)->
-    // casinoValue.getPaymentId(),
-    //                            (casinoTransaction, payment)->EnrichedCasinoTransaction.builder()
-    //                                    .casinoTransactionRequest(casinoTransaction)
-    //                                    .paymentRequest(payment)
-    //
-    // .accountsProductRequest(createAccountsProductRequest(payment))
-    //                                    .build())
-    //                            .leftJoin(accountsProductRequestTable,
-    //                                    (paymentId,enrichedCasinoTransaction)->
-    // enrichedCasinoTransaction.getAccountsProductRequest().getDisplayId(),
-    //                                    (enrichedCasinoTransaction, accountsProduct) ->
-    // enrichedCasinoTransaction.setAccountsProductRequest(accountsProduct))
-    //                                    .selectKey((key,value)-> )
+        KStream<Long, EnrichedCasinoTransaction> enrichedCasinoTransactionStream =
+                casinoTransactionRequestStream
+                        .join(paymentRequestStream, (casinoKey, casinoValue)->
+     casinoValue.getPaymentId(),
+                                (casinoTransaction, payment)->EnrichedCasinoTransaction.builder()
+                                        .casinoTransactionRequest(casinoTransaction)
+                                        .paymentRequest(payment)
+                                        .build()).peek((key, value) ->
+                                log.info("Key: "+key.toString() + " - "+" Value "+value.toString()));
 
-        enrichedCasinoTransactionStream.foreach((key, value) ->
-                log.info("Key: "+key.toString() + " - "+" Value "+value.toString()));
+    KStream<Long, EnrichedCasinoTransaction> enrichedCasinoTransactionStream2 =
+            enrichedCasinoTransactionStream.join(accountsProductRequestTable,(enrichKey,enrichValue) -> enrichValue.getPaymentRequest().getSourceId(),
+                            (enrichCasino, accountsProduct) -> createEnrichedCasino(accountsProduct, enrichCasino))
+                    .selectKey((key,value) -> value.getCasinoTransactionRequest().getId())
+                    .peek((key, value) ->
+                            log.info("Key: "+key.toString() + " - "+" Value "+value.toString()));
+
+//        enrichedCasinoTransactionStream.foreach((key, value) ->
+//                log.info("Key: "+key.toString() + " - "+" Value "+value.toString()));
 
 //    enrichedCasinoTransactionStream.peek(
 //        (key, value) ->
@@ -175,7 +168,10 @@ public class CasinoTransactionTopology {
     return AccountsProductRequest.builder().displayId(paymentRequest.getSourceId()).build();
   }
 
-  //  private static PaymentRequest createPaymentRequest(CasinoTransactionRequest
-  // casinoTransactionRequest){
-  //  }
+    private static EnrichedCasinoTransaction createEnrichedCasino(AccountsProductRequest accountsProductRequest, EnrichedCasinoTransaction enrichedCasinoTransaction){
+      if(accountsProductRequest!=null){
+        enrichedCasinoTransaction.setAccountsProductRequest(accountsProductRequest);
+      }
+      return enrichedCasinoTransaction;
+    }
 }
