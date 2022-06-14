@@ -1,9 +1,9 @@
 package com.example.kafkastreams.topology;
 
 import com.example.kafkastreams.KafkaStreamsApplication;
-import com.example.kafkastreams.model.CasinoTransaction;
-import com.example.kafkastreams.model.CasinoZiqni;
-import com.example.kafkastreams.model.JsonSerde;
+import com.example.kafkastreams.request.CasinoTransactionRequest;
+import com.example.kafkastreams.ziqni.CasinoZiqni;
+import com.example.kafkastreams.serde.JsonSerde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.TestInputTopic;
@@ -18,10 +18,10 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CasinoTransactionTopologyTest extends KafkaStreamsApplication {
+class CasinoTransactionRequestTopologyTest extends KafkaStreamsApplication {
 
   TopologyTestDriver testDriver;
-  private TestInputTopic<Long, CasinoTransaction> casinoTransactionTestInputTopic;
+  private TestInputTopic<Long, CasinoTransactionRequest> casinoTransactionTestInputTopic;
   private TestOutputTopic<Long, CasinoZiqni> casinoZiqniTestOutputTopic;
 
   @BeforeEach
@@ -31,7 +31,7 @@ class CasinoTransactionTopologyTest extends KafkaStreamsApplication {
     props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "dummy:1234");
 
     var casinoZiqniJsonSerde = new JsonSerde<>(CasinoZiqni.class);
-    var casinoTransactionJsonSerde = new JsonSerde<>(CasinoTransaction.class);
+    var casinoTransactionJsonSerde = new JsonSerde<>(CasinoTransactionRequest.class);
 
     casinoTransactionTestInputTopic =
         testDriver.createInputTopic(
@@ -54,13 +54,13 @@ class CasinoTransactionTopologyTest extends KafkaStreamsApplication {
   @Test
   void testTopology() {
     List.of(
-            CasinoTransaction.builder().id(1L).type("First type").status("Active").build(),
-            CasinoTransaction.builder().id(2L).type("Second type").status("Active").build(),
-            CasinoTransaction.builder().id(3L).type("Third type").status("Inactive").build())
+            CasinoTransactionRequest.builder().id(1L).type("First type").status("Active").build(),
+            CasinoTransactionRequest.builder().id(2L).type("Second type").status("Active").build(),
+            CasinoTransactionRequest.builder().id(3L).type("Third type").status("Inactive").build())
         .forEach(
-            casinoTransaction ->
+                casinoTransactionRequest ->
                 casinoTransactionTestInputTopic.pipeInput(
-                    casinoTransaction.getId(), casinoTransaction));
+                    casinoTransactionRequest.getId(), casinoTransactionRequest));
 
     var firstZiqni = casinoZiqniTestOutputTopic.readValue();
     assertEquals("First type", firstZiqni.getRelatesToExternal());

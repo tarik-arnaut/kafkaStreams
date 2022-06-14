@@ -1,6 +1,6 @@
 package com.example.kafkastreams.service;
 
-import com.example.kafkastreams.model.CasinoZiqni;
+import com.example.kafkastreams.ziqni.CasinoZiqni;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.state.QueryableStoreTypes;

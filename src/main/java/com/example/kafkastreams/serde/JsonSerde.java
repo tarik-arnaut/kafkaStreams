@@ -1,4 +1,4 @@
-package com.example.kafkastreams.model;
+package com.example.kafkastreams.serde;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;

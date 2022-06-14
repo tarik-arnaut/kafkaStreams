@@ -23,6 +23,16 @@ public class TopicConfiguration {
   }
 
   @Bean
+  public NewTopic paymentTopic() {
+    return TopicBuilder.name("payment.topic").partitions(4).replicas(1).compact().build();
+  }
+
+  @Bean
+  public NewTopic accountsProductTopic() {
+    return TopicBuilder.name("accounts.product.topic").partitions(4).replicas(1).compact().build();
+  }
+
+  @Bean
   public NewTopic casinoZiqniTopic() {
     return TopicBuilder.name("casino.ziqni").partitions(4).replicas(1).compact().build();
   }

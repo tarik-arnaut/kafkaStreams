@@ -1,6 +1,6 @@
 package com.example.kafkastreams.controller;
 
-import com.example.kafkastreams.model.CasinoZiqni;
+import com.example.kafkastreams.ziqni.CasinoZiqni;
 import com.example.kafkastreams.service.CasinoZiqniService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

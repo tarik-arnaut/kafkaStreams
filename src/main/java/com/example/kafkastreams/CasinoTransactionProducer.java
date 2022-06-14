@@ -1,6 +1,8 @@
 package com.example.kafkastreams;
 
-import com.example.kafkastreams.model.CasinoTransaction;
+import com.example.kafkastreams.request.AccountsProductRequest;
+import com.example.kafkastreams.request.CasinoTransactionRequest;
+import com.example.kafkastreams.request.PaymentRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -17,44 +19,30 @@ public class CasinoTransactionProducer {
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public static void main(String[] args) {
-    KafkaProducer<Long, String> casinoTransactionProducer =
+    KafkaProducer<Long, String> producer =
         new KafkaProducer<>(
             Map.of(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092",
                 ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class,
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class));
 
-    List<CasinoTransaction> transactionData =
+    List<CasinoTransactionRequest> transactionData =
         List.of(
-            CasinoTransaction.builder()
-                .id(1L)
-                .type("Error3")
-                .status("Active")
-                .accountId(1)
-                .amount(1)
-                .createdAt(3123123L)
-                .currency("3213")
-                .paymentId(3)
-                .reversesId(3)
-                .userType("ewqe")
-                .undoControlId(1)
-                .uuid(3L)
-                .build(),
-            CasinoTransaction.builder()
+            CasinoTransactionRequest.builder()
                 .id(2L)
-                .type("Second type")
+                .type("gg type")
                 .status("Active")
                 .accountId(1)
                 .amount(1)
                 .createdAt(3123123L)
                 .currency("3213")
-                .paymentId(3)
+                .paymentId(4L)
                 .reversesId(3)
                 .userType("ewqe")
                 .undoControlId(1)
                 .uuid(3L)
                 .build(),
-            CasinoTransaction.builder()
+            CasinoTransactionRequest.builder()
                 .id(3L)
                 .type("Third type")
                 .status("Inactive")
@@ -62,28 +50,140 @@ public class CasinoTransactionProducer {
                 .amount(1)
                 .createdAt(3123123L)
                 .currency("3213")
-                .paymentId(3)
+                .paymentId(12L)
                 .reversesId(3)
                 .userType("ewqe")
                 .undoControlId(1)
                 .uuid(3L)
-                .build());
+                .build(),
+            CasinoTransactionRequest.builder()
+                .id(4L)
+                .type("Third type")
+                .status("Inactive")
+                .accountId(1)
+                .amount(1)
+                .createdAt(3123123L)
+                .currency("3213")
+                .paymentId(35L)
+                .reversesId(3)
+                .userType("ewqe")
+                .undoControlId(1)
+                .uuid(3L)
+                .build(),
+                CasinoTransactionRequest.builder()
+                        .id(10L)
+                        .type("Third type")
+                        .status("Inactive")
+                        .accountId(1)
+                        .amount(1)
+                        .createdAt(3123123L)
+                        .currency("3213")
+                        .paymentId(35L)
+                        .reversesId(3)
+                        .userType("ewqe")
+                        .undoControlId(1)
+                        .uuid(3L)
+                        .build());
+
+    List<AccountsProductRequest> productData =
+        List.of(
+            AccountsProductRequest.builder()
+                .type("2nd type")
+                .id(2L)
+                .aggregator("Aggry")
+                .group("some group")
+                .displayId("Right")
+                .build(),
+            AccountsProductRequest.builder()
+                .type("2nd type")
+                .id(3L)
+                .aggregator("Aggry")
+                .displayId("Left")
+                .group("some group")
+                .build(),
+            AccountsProductRequest.builder()
+                .type("2nd type")
+                .id(4L)
+                .aggregator("Aggry")
+                .displayId("Left")
+                .group("some group")
+                .build(),
+                AccountsProductRequest.builder()
+                        .type("2nd type")
+                        .id(10L)
+                        .aggregator("Aggry")
+                        .displayId("Left")
+                        .group("some group")
+                        .build());
+
+    List<PaymentRequest> paymentData =
+        List.of(
+            PaymentRequest.builder()
+                .id(2L)
+                .status(123)
+                .uuid("deqweqw")
+                .strategy(3231231)
+                .sourceId("Left")
+                .build(),
+            PaymentRequest.builder()
+                .id(3L)
+                .status(123)
+                .uuid("deqweqw")
+                .strategy(3231231)
+                .sourceId("Left")
+                .build(),
+            PaymentRequest.builder()
+                .id(4L)
+                .status(123)
+                .uuid("deqweqw")
+                .strategy(3231231)
+                .sourceId("Right")
+                .build(),
+                PaymentRequest.builder()
+                        .id(10L)
+                        .status(123)
+                        .uuid("deqweqw")
+                        .strategy(3231231)
+                        .sourceId("Right")
+                        .build()
+                );
+
     transactionData.stream()
+            .map(
+                    casinoTransactionRequest ->
+                            new ProducerRecord<>(
+                                    "casino.transaction",
+                                    casinoTransactionRequest.getId(),
+                                    toJson(casinoTransactionRequest)))
+            .forEach(record -> send(producer, record));
+
+    productData.stream()
         .map(
-            casinoTransaction ->
+            accountsProductRequest ->
                 new ProducerRecord<>(
-                    "casino.transaction", casinoTransaction.getId(), toJson(casinoTransaction)))
-        .forEach(record -> send(casinoTransactionProducer, record));
+                    "accounts.product.topic",
+                    accountsProductRequest.getId(),
+                    toJson(accountsProductRequest)))
+        .forEach(record -> send(producer, record));
+
+    paymentData.stream()
+        .map(
+            paymentRequest ->
+                new ProducerRecord<>(
+                    "payment.topic", paymentRequest.getId(), toJson(paymentRequest)))
+        .forEach(record -> send(producer, record));
+
+
   }
 
   @SneakyThrows
   private static void send(
-      KafkaProducer<Long, String> casinoTransactionProducer, ProducerRecord<Long, String> record) {
-    casinoTransactionProducer.send(record).get();
+      KafkaProducer<Long, String> producer, ProducerRecord<Long, String> record) {
+    producer.send(record).get();
   }
 
   @SneakyThrows
-  private static String toJson(CasinoTransaction casinoTransaction) {
-    return OBJECT_MAPPER.writeValueAsString(casinoTransaction);
+  private static <T> String toJson(T request) {
+    return OBJECT_MAPPER.writeValueAsString(request);
   }
 }

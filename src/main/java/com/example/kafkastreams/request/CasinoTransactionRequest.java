@@ -1,16 +1,14 @@
-package com.example.kafkastreams.model;
+package com.example.kafkastreams.request;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CasinoTransaction {
+@Getter
+public class CasinoTransactionRequest {
 
   Long id;
 
@@ -20,7 +18,7 @@ public class CasinoTransaction {
   String type;
 
   @JsonAlias("payment_id")
-  Integer paymentId;
+  Long paymentId;
 
   Long uuid;
   String status;
