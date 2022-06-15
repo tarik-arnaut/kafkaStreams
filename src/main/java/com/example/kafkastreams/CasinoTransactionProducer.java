@@ -26,6 +26,13 @@ public class CasinoTransactionProducer {
                 ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class,
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class));
 
+    KafkaProducer<String, String> producer2 =
+            new KafkaProducer<>(
+                    Map.of(
+                            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092",
+                            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
+                            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class));
+
     List<CasinoTransactionRequest> transactionData =
         List.of(
             CasinoTransactionRequest.builder()
@@ -182,9 +189,9 @@ public class CasinoTransactionProducer {
             accountsProductRequest ->
                 new ProducerRecord<>(
                     "accounts.product.topic",
-                    accountsProductRequest.getId(),
+                    accountsProductRequest.getDisplayId(),
                     toJson(accountsProductRequest)))
-        .forEach(record -> send(producer, record));
+        .forEach(record -> send2(producer2, record));
 
     paymentData.stream()
         .map(
@@ -197,6 +204,12 @@ public class CasinoTransactionProducer {
   @SneakyThrows
   private static void send(
       KafkaProducer<Long, String> producer, ProducerRecord<Long, String> record) {
+    producer.send(record).get();
+  }
+
+  @SneakyThrows
+  private static void send2(
+          KafkaProducer<String, String> producer, ProducerRecord<String, String> record) {
     producer.send(record).get();
   }
 
