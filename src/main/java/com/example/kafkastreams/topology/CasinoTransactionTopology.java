@@ -133,11 +133,9 @@ public class CasinoTransactionTopology {
                                 (casinoTransaction, payment)->EnrichedCasinoTransaction.builder()
                                         .casinoTransactionRequest(casinoTransaction)
                                         .paymentRequest(payment)
-                                        .build()).peek((key, value) ->
-                                log.info("Key: "+key.toString() + " - "+" Value "+value.toString()));
+                                        .build())
 
-    KStream<Long, EnrichedCasinoTransaction> enrichedCasinoTransactionStream2 =
-            enrichedCasinoTransactionStream.join(accountsProductRequestTable,(enrichKey,enrichValue) -> enrichValue.getPaymentRequest().getSourceId(),
+                        .join(accountsProductRequestTable,(enrichKey,enrichValue) -> enrichValue.getPaymentRequest().getSourceId(),
                             (enrichCasino, accountsProduct) -> createEnrichedCasino(accountsProduct, enrichCasino))
                     .selectKey((key,value) -> value.getCasinoTransactionRequest().getId())
                     .peek((key, value) ->
