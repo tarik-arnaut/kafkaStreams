@@ -36,4 +36,9 @@ public class TopicConfiguration {
   public NewTopic casinoZiqniTopic() {
     return TopicBuilder.name("casino.ziqni").partitions(4).replicas(1).compact().build();
   }
+
+  @Bean
+  public NewTopic userTopic() {
+    return TopicBuilder.name("user.topic").partitions(4).replicas(1).compact().build();
+  }
 }

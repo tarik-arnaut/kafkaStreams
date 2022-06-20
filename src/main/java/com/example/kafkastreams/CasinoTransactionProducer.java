@@ -3,6 +3,7 @@ package com.example.kafkastreams;
 import com.example.kafkastreams.request.AccountsProductRequest;
 import com.example.kafkastreams.request.CasinoTransactionRequest;
 import com.example.kafkastreams.request.PaymentRequest;
+import com.example.kafkastreams.request.UserRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -156,7 +157,7 @@ public class CasinoTransactionProducer {
             PaymentRequest.builder()
                 .id(4L)
                 .status(123)
-                .uuid("deqweqw")
+                .uuid("Good uuid")
                 .strategy(3231231)
                 .sourceId("Right")
                 .build(),
@@ -175,6 +176,25 @@ public class CasinoTransactionProducer {
                 .sourceId("Right")
                 .build());
 
+    List<UserRequest> userData = List.of(
+            UserRequest.builder()
+                    .id(1L)
+                    .uuid("Good uuid")
+                    .build(),
+            UserRequest.builder()
+                    .id(2L)
+                    .uuid("Bad uuid")
+                    .build(),
+            UserRequest.builder()
+                    .id(3L)
+                    .uuid("Bad uuid")
+                    .build(),
+            UserRequest.builder()
+                    .id(4L)
+                    .uuid("Bad uuid")
+                    .build()
+    );
+
     transactionData.stream()
         .map(
             casinoTransactionRequest ->
@@ -192,6 +212,15 @@ public class CasinoTransactionProducer {
                     accountsProductRequest.getDisplayId(),
                     toJson(accountsProductRequest)))
         .forEach(record -> send2(producer2, record));
+
+    userData.stream()
+            .map(
+                    userRequest ->
+                            new ProducerRecord<>(
+                                    "user.topic",
+                                    userRequest.getUuid(),
+                                    toJson(userRequest)))
+            .forEach(record -> send2(producer2, record));
 
     paymentData.stream()
         .map(
