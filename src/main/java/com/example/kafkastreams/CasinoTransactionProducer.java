@@ -180,6 +180,7 @@ public class CasinoTransactionProducer {
             UserRequest.builder()
                     .id(1L)
                     .uuid("Good uuid")
+                    .clubUuid("tenant")
                     .build(),
             UserRequest.builder()
                     .id(2L)
@@ -187,7 +188,8 @@ public class CasinoTransactionProducer {
                     .build(),
             UserRequest.builder()
                     .id(3L)
-                    .uuid("Bad uuid")
+                    .uuid("Good uuid")
+                    .clubUuid("wrongTenant")
                     .build(),
             UserRequest.builder()
                     .id(4L)

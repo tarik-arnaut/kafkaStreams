@@ -88,12 +88,14 @@ public class CasinoTransactionTopology {
 
     KStream<String, AccountsProductRequest> accountsProductRequestStream =
             streamsBuilder.stream(
-                    "accounts.product.topic", Consumed.with(Serdes.String(), accountsProductRequestSerde));
+                    "accounts.product.topic", Consumed.with(Serdes.String(), accountsProductRequestSerde))
+                    .filter((key,value)->value.getType() != null && value.getType().equals("TRANSACTION"));
     accountsProductRequestStream.selectKey((key,value)->value.getDisplayId()).to("account.product.table.topic", Produced.with(Serdes.String(), accountsProductRequestSerde));
 
     KStream<String, UserRequest> userRequestStream =
             streamsBuilder.stream(
-                    "user.topic", Consumed.with(Serdes.String(), userRequestSerde));
+                    "user.topic", Consumed.with(Serdes.String(), userRequestSerde))
+                    .filter((key,value)-> value.getClubUuid() != null && value.getClubUuid().equals("tenant"));
     userRequestStream.selectKey((key,value)->value.getUuid()).to("user.table.topic", Produced.with(Serdes.String(), userRequestSerde));
 
     //-----------> STREAMS
