@@ -41,4 +41,21 @@ public class TopicConfiguration {
   public NewTopic userTopic() {
     return TopicBuilder.name("user.topic").partitions(4).replicas(1).compact().build();
   }
+
+  @Bean
+  public NewTopic paymentTableTopic() {
+    return TopicBuilder.name("payment.table.topic").partitions(4).replicas(1).compact().build();
+  }
+
+  @Bean
+  public NewTopic accountProductTableTopic() {
+    return TopicBuilder.name("account.product.table.topic").partitions(4).replicas(1).compact().build();
+  }
+
+  @Bean
+  public NewTopic userTableTopic() {
+    return TopicBuilder.name("user.table.topic").partitions(4).replicas(1).compact().build();
+  }
+
+
 }
