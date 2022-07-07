@@ -50,6 +50,11 @@ public class CasinoTransactionTopology {
   private final Serde<AccountsProductRequest> accountProductRequestSerde =
       new JsonSerde<>(AccountsProductRequest.class);
 
+  private final Serde<CasinoZiqni> casinoZiqniSerde = new JsonSerde<>(CasinoZiqni.class);
+
+  private final Serde<EnrichedCasinoTransaction> enrichedCasinoTransactionSerde =
+      new JsonSerde<>(EnrichedCasinoTransaction.class);
+
   public CasinoTransactionTopology(
       @Qualifier("paymentTableTopic") NewTopic paymentTableTopic,
       @Qualifier("accountProductTableTopic") NewTopic accountProductTableTopic,
@@ -89,9 +94,6 @@ public class CasinoTransactionTopology {
   }
 
   public Topology buildTopology() {
-    Serde<CasinoZiqni> casinoZiqniSerde = new JsonSerde<>(CasinoZiqni.class);
-    Serde<EnrichedCasinoTransaction> enrichedCasinoTransactionSerde =
-        new JsonSerde<>(EnrichedCasinoTransaction.class);
 
     StreamsBuilder streamsBuilder = new StreamsBuilder();
 
