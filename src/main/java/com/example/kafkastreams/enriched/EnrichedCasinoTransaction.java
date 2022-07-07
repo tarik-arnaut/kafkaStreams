@@ -6,16 +6,15 @@ import com.example.kafkastreams.request.PaymentRequest;
 import com.example.kafkastreams.request.UserRequest;
 import lombok.*;
 
-@Getter
-@Builder
-@Setter
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Getter
+@Setter
+@ToString
 public class EnrichedCasinoTransaction {
   private CasinoTransactionRequest casinoTransactionRequest;
   private PaymentRequest paymentRequest;
   private AccountsProductRequest accountsProductRequest;
   private UserRequest userRequest;
-
 }

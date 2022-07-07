@@ -110,7 +110,7 @@ public class CasinoTransactionProducer {
     List<AccountsProductRequest> productData =
         List.of(
             AccountsProductRequest.builder()
-                .type("2nd type")
+                .type("TRANSACTION")
                 .id(2L)
                 .aggregator("Aggry")
                 .group("some group")
@@ -201,7 +201,7 @@ public class CasinoTransactionProducer {
         .map(
             casinoTransactionRequest ->
                 new ProducerRecord<>(
-                    "casino.transaction",
+                    "transaction.topic",
                     casinoTransactionRequest.getId(),
                     toJson(casinoTransactionRequest)))
         .forEach(record -> send(producer, record));
@@ -210,7 +210,7 @@ public class CasinoTransactionProducer {
         .map(
             accountsProductRequest ->
                 new ProducerRecord<>(
-                    "accounts.product.topic",
+                    "account.product.topic",
                     accountsProductRequest.getDisplayId(),
                     toJson(accountsProductRequest)))
         .forEach(record -> send2(producer2, record));

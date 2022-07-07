@@ -3,11 +3,11 @@ package com.example.kafkastreams.request;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.*;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
+@ToString
 public class CasinoTransactionRequest {
 
   Long id;

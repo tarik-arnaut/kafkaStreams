@@ -18,8 +18,8 @@ public class TopicConfiguration {
   }
 
   @Bean
-  public NewTopic casinoTransactionTopic() {
-    return TopicBuilder.name("casino.transaction").partitions(4).replicas(1).compact().build();
+  public NewTopic transactionTopic() {
+    return TopicBuilder.name("transaction.topic").partitions(4).replicas(1).compact().build();
   }
 
   @Bean
@@ -28,18 +28,28 @@ public class TopicConfiguration {
   }
 
   @Bean
-  public NewTopic accountsProductTopic() {
-    return TopicBuilder.name("accounts.product.topic").partitions(4).replicas(1).compact().build();
+  public NewTopic accountProductTopic() {
+    return TopicBuilder.name("account.product.topic").partitions(4).replicas(1).compact().build();
   }
 
   @Bean
-  public NewTopic casinoZiqniTopic() {
-    return TopicBuilder.name("casino.ziqni").partitions(4).replicas(1).compact().build();
+  public NewTopic platformProductTopic() {
+    return TopicBuilder.name("platform.product.topic").partitions(4).replicas(1).compact().build();
   }
 
   @Bean
   public NewTopic userTopic() {
     return TopicBuilder.name("user.topic").partitions(4).replicas(1).compact().build();
+  }
+
+  @Bean
+  public NewTopic casinoZiqniTopic() {
+    return TopicBuilder.name("casino.ziqni.topic").partitions(4).replicas(1).compact().build();
+  }
+
+  @Bean
+  public NewTopic transactionTableTopic() {
+    return TopicBuilder.name("transaction.table.topic").partitions(4).replicas(1).compact().build();
   }
 
   @Bean
@@ -49,13 +59,15 @@ public class TopicConfiguration {
 
   @Bean
   public NewTopic accountProductTableTopic() {
-    return TopicBuilder.name("account.product.table.topic").partitions(4).replicas(1).compact().build();
+    return TopicBuilder.name("account.product.table.topic")
+        .partitions(4)
+        .replicas(1)
+        .compact()
+        .build();
   }
 
   @Bean
   public NewTopic userTableTopic() {
     return TopicBuilder.name("user.table.topic").partitions(4).replicas(1).compact().build();
   }
-
-
 }
