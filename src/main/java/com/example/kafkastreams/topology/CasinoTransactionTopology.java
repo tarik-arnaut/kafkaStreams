@@ -8,13 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.GlobalKTable;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
@@ -44,6 +43,9 @@ public class CasinoTransactionTopology {
       new JsonSerde<>(PlatformProductRequest.class);
 
   private final Serde<PaymentRequest> paymentRequestSerde = new JsonSerde<>(PaymentRequest.class);
+
+  private final Serde<AccountsProductRequest> accountsProductRequestSerde =
+      new JsonSerde<>(AccountsProductRequest.class);
 
   private final Serde<AccountsProductRequest> accountProductRequestSerde =
       new JsonSerde<>(AccountsProductRequest.class);
@@ -87,38 +89,9 @@ public class CasinoTransactionTopology {
   }
 
   public Topology buildTopology() {
-    //    KStream<Long, CasinoZiqni> casinoZiqniStream =
-    //        streamsBuilder.stream(
-    //                        "casino.transaction", Consumed.with(Serdes.Long(),
-    // casinoTransactionSerde))
-    //                .filter((aLong, casinoTransaction) ->
-    // casinoTransaction.getType().equals("Error"))
-    //            .groupByKey()
-    //            .aggregate(
-    //                CasinoZiqni::new,
-    //                (key, value, aggregate) -> aggregate.process(value),
-    //                Materialized.<Long, CasinoZiqni, KeyValueStore<Bytes, byte[]>>as(
-    //                        "casino.ziqni.store")
-    //                    .withKeySerde(Serdes.Long())
-    //                    .withValueSerde(casinoZiqniSerde))
-    //            .toStream();
-    //
-    //    casinoZiqniStream.to("casino.ziqni", Produced.with(Serdes.Long(), casinoZiqniSerde));
-
-    Serde<CasinoTransactionRequest> casinoTransactionRequestSerde =
-        new JsonSerde<>(CasinoTransactionRequest.class);
-
-    Serde<PaymentRequest> paymentRequestSerde = new JsonSerde<>(PaymentRequest.class);
-
-    Serde<AccountsProductRequest> accountsProductRequestSerde =
-        new JsonSerde<>(AccountsProductRequest.class);
-
-    Serde<UserRequest> userRequestSerde = new JsonSerde<>(UserRequest.class);
-
+    Serde<CasinoZiqni> casinoZiqniSerde = new JsonSerde<>(CasinoZiqni.class);
     Serde<EnrichedCasinoTransaction> enrichedCasinoTransactionSerde =
         new JsonSerde<>(EnrichedCasinoTransaction.class);
-
-    Serde<CasinoZiqni> casinoZiqniSerde = new JsonSerde<>(CasinoZiqni.class);
 
     StreamsBuilder streamsBuilder = new StreamsBuilder();
 
@@ -203,6 +176,19 @@ public class CasinoTransactionTopology {
             .peek(
                 (key, value) ->
                     log.info("Key: " + key.toString() + " - " + " Value " + value.toString()));
+
+    KStream<Long, CasinoZiqni> casinoZiqniStream =
+        enrichedCasinoTransactionStream
+            .groupByKey(Grouped.with(Serdes.Long(), enrichedCasinoTransactionSerde))
+            .aggregate(
+                CasinoZiqni::new,
+                (key, value, aggregate) -> aggregate.process(value.getCasinoTransactionRequest()),
+                Materialized.<Long, CasinoZiqni, KeyValueStore<Bytes, byte[]>>as(
+                        "casino.ziqni.store")
+                    .withKeySerde(Serdes.Long())
+                    .withValueSerde(casinoZiqniSerde))
+            .toStream()
+            .peek((key, value) -> System.out.println("ZIQNI: " + value));
 
     return streamsBuilder.build();
   }
